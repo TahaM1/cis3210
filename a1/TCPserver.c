@@ -12,6 +12,7 @@
 
 #define PORTNUM 2300
 #define MAXRCVLEN 500
+#define MAX_FILE_NAME 255
 #define DEFAULT_BUFSIZE 4096
 
 int mysocket; // socket used to listen for incoming connections
@@ -97,16 +98,28 @@ int main(int argc, char *argv[])
 	// Create a socket to communicate with the client that just connected
 	consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
 
-	FILE *file = fopen("example.txt", "wb");
-	if (file == NULL)
-	{
-		perror("Error opening file for writing");
-		close(mysocket);
-		return EXIT_FAILURE;
-	}
-
 	while (consocket)
 	{
+
+		FILE *file;
+		char filename[MAX_FILE_NAME];
+		char file_size[3];
+		// Receive the filename from the client
+
+		len = recv(consocket, file_size, 4, 0);
+		printf("%s\n", file_size);
+		len = recv(consocket, filename, atoi(file_size), 0);
+		filename[atoi(file_size)] = '\0';
+		printf("%s\n", filename);
+
+		// Open a file with the received filename for writing
+		file = fopen(filename, "wb");
+		if (file == NULL)
+		{
+			perror("Error opening file for writing");
+			close(mysocket);
+			return EXIT_FAILURE;
+		}
 		// dest contains information - IP address, port number, etc. - in network byte order
 		// We need to convert it to host byte order before displaying it
 		printf("Incoming connection from %s on port %d\n", inet_ntoa(dest.sin_addr), ntohs(dest.sin_port));
@@ -122,12 +135,13 @@ int main(int argc, char *argv[])
 		}
 
 		fclose(file);
-
 		// Close current connection
 		close(consocket);
 
 		// Continue listening for incoming connections
 		consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
+
+		// Close the previous file and open a new file with the received filename for writing
 	}
 
 	close(mysocket);

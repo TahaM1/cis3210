@@ -7,8 +7,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#define MAXRCVLEN 500
 #define PORTNUM 2300
+#define MAXRCVLEN 500
 #define DEFAULT_BUFSIZE 4096
 
 void error(const char *msg)
@@ -37,9 +37,6 @@ int main(int argc, char *argv[])
 		error("Error opening file");
 	}
 
-	char buffer[bufSize];
-	int bytesRead;
-
 	int mysocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (mysocket == -1)
 	{
@@ -60,8 +57,17 @@ int main(int argc, char *argv[])
 	{
 		error("Error connecting to the server");
 	}
+	// filename size
+	char file_size[4];
+	sprintf(file_size, "%d", strlen(fileName));
+	send(mysocket, file_size, 4, 0);
+	// Send the filename to the server
+	send(mysocket, fileName, strlen(fileName), 0);
 
 	// Send the file in chunks
+	char buffer[bufSize];
+	int bytesRead;
+
 	while ((bytesRead = fread(buffer, 1, bufSize, file)) > 0)
 	{
 		if (send(mysocket, buffer, bytesRead, 0) == -1)
