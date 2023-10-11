@@ -1,6 +1,6 @@
 all: 
-	gcc TCPclient.c -o client
+	gcc TCPclient.c -o sendFile
 	gcc TCPserver.c -o server
 clean:
-	rm client
+	rm sendFile
 	rm server
