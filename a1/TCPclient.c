@@ -19,7 +19,7 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
-	if (argc < 4)
+	if (argc < 3)
 	{
 		fprintf(stderr, "Usage: %s fileName server-IP-address:port-number [bufSize]\n", argv[0]);
 		exit(EXIT_FAILURE);
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	char *serverAddress = strtok(argv[2], ":");
 	char *serverPortStr = strtok(NULL, ":");
 	int serverPort = (serverPortStr != NULL) ? atoi(serverPortStr) : PORTNUM;
-	int bufSize = (argc == 5) ? atoi(argv[4]) : DEFAULT_BUFSIZE;
+	int bufSize = (argc == 4) ? atoi(argv[3]) : DEFAULT_BUFSIZE;
 
 	FILE *file = fopen(fileName, "rb");
 	if (file == NULL)

@@ -104,13 +104,14 @@ int main(int argc, char *argv[])
 		FILE *file;
 		char filename[MAX_FILE_NAME];
 		char file_size[3];
+		long file_total_size = 0;
+		int chunks = 0;
 		// Receive the filename from the client
-
+		printf("=========================================\n");
 		len = recv(consocket, file_size, 4, 0);
-		printf("%s\n", file_size);
+
 		len = recv(consocket, filename, atoi(file_size), 0);
 		filename[atoi(file_size)] = '\0';
-		printf("%s\n", filename);
 
 		// Open a file with the received filename for writing
 		file = fopen(filename, "wb");
@@ -128,11 +129,18 @@ int main(int argc, char *argv[])
 		while ((len = recv(consocket, buffer, bufSize, 0)) > 0)
 		{
 			buffer[len] = '\0';
-			printf("Received %d bytes\n", len);
-
+			file_total_size += len;
+			chunks++;
 			// Write received data to the file
 			fwrite(buffer, 1, len, file);
 		}
+
+		if (len == -1)
+		{
+
+			printf("An error occured in the transport of the file.\n");
+		}
+		printf("Filename: %s\nFile size: %d\nChunks: %d\n", filename, file_total_size, chunks);
 
 		fclose(file);
 		// Close current connection
