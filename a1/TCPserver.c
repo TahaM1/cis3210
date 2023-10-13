@@ -62,14 +62,9 @@ int main(int argc, char *argv[])
 	serv.sin_addr.s_addr = htonl(INADDR_ANY); // Set our address to any interface
 	serv.sin_port = htons(serverPort);		  // Set the server port number
 
-	/* Create a socket.
-	   The arguments indicate that this is an IPv4, TCP socket
-	*/
+	/* Create a socket.*/
 	mysocket = socket(AF_INET, SOCK_STREAM, 0);
 
-	// bind serv information to mysocket
-	// Unlike all other function calls in this example, this call to bind()
-	// does some basic error handling
 	int flag = 1;
 
 	if (setsockopt(mysocket, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag)) == -1)
@@ -83,17 +78,13 @@ int main(int argc, char *argv[])
 	{
 		printf("Unable to open TCP socket on localhost:%d\n", serverPort);
 
-		/*  strerror() returns a string representation of the system variable "errno"
-			errno is the integer code of the error that occurred during the last system call from this process
-			need to include errno.h to use this function
-			*/
 		printf("%s\n", strerror(errno));
 		close(mysocket);
 		return 0;
 	}
 
-	// start listening, allowing a queue of up to 1 pending connection
-	listen(mysocket, 0);
+	// start listening, allowing a queue of up to 10 pending connection
+	listen(mysocket, 10);
 
 	// Create a socket to communicate with the client that just connected
 	consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
@@ -121,8 +112,6 @@ int main(int argc, char *argv[])
 			close(mysocket);
 			return EXIT_FAILURE;
 		}
-		// dest contains information - IP address, port number, etc. - in network byte order
-		// We need to convert it to host byte order before displaying it
 		printf("Incoming connection from %s on port %d\n", inet_ntoa(dest.sin_addr), ntohs(dest.sin_port));
 
 		// Receive data from the client
@@ -148,8 +137,6 @@ int main(int argc, char *argv[])
 
 		// Continue listening for incoming connections
 		consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
-
-		// Close the previous file and open a new file with the received filename for writing
 	}
 
 	close(mysocket);
